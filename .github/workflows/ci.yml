@@ -1,0 +1,88 @@
+name: PlatformIO CI/CD
+
+on:
+  push:
+    branches: [ main, develop, feature/* ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        environment: [esp32dev, esp32dev_release]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Cache PlatformIO
+        uses: actions/cache@v3
+        with:
+          path: ~/.platformio
+          key: ${{ runner.os }}-platformio-${{ hashFiles('platformio.ini') }}
+          restore-keys: |
+            ${{ runner.os }}-platformio-
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Install PlatformIO
+        run: |
+          python -m pip install --upgrade pip
+          pip install platformio
+      
+      - name: Build project [${{ matrix.environment }}]
+        run: pio run -e ${{ matrix.environment }}
+      
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: firmware-${{ matrix.environment }}
+          path: .pio/build/${{ matrix.environment }}/firmware.bin
+          if-no-files-found: warn
+
+  analyze:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Install PlatformIO
+        run: pip install platformio
+      
+      - name: Static code analysis
+        continue-on-error: true
+        run: pio check --verbose
+
+  size-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Install PlatformIO
+        run: pip install platformio
+      
+      - name: Check firmware size
+        run: |
+          pio run -e esp32dev
+          echo "=== Firmware Size ===" 
+          ls -lh .pio/build/esp32dev/firmware.bin
