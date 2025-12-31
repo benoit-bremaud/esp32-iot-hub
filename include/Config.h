@@ -29,8 +29,8 @@
 #define MODULE_AUTHOR "Benoit Bremaud"
 
 // ===== COMPILATION FLAGS =====
-#define ENABLE_WIFI 0           // Désactivé sans module
-#define ENABLE_BLE 0            // Désactivé sans module
+#define ENABLE_WIFI 1           // ✅ Activé pour Phase 2
+#define ENABLE_BLE 0            // À faire en Phase 3
 #define ENABLE_I2C 1            // Test local possible
 #define ENABLE_ADC 1            // Test local possible
 #define ENABLE_DEEP_SLEEP 0     // Désactivé en développement
@@ -135,7 +135,7 @@ static inline void printSystemInfo() {
     DPRINTLN("\n╔════════════════════════════════════════╗");
     DPRINTLN("║       ESP32-WROOM-32E System Info      ║");
     DPRINTLN("╚════════════════════════════════════════╝");
-    
+
     DPRINTF("Module:       %s v%s\n", MODULE_NAME, MODULE_VERSION);
     DPRINTF("Author:       %s\n", MODULE_AUTHOR);
     DPRINTF("Compile Date: %s %s\n", __DATE__, __TIME__);
@@ -144,19 +144,19 @@ static inline void printSystemInfo() {
     DPRINTF("Free SRAM:    %s\n", formatBytes(ESP.getFreeHeap()).c_str());
     DPRINTF("Flash:        %s\n", formatBytes(ESP.getFlashChipSize()).c_str());
     DPRINTF("Chip ID:      0x%X\n", (uint32_t)ESP.getEfuseMac());
-    
+
     #if ENABLE_WIFI
     DPRINTLN("WiFi:         ENABLED");
     #else
     DPRINTLN("WiFi:         DISABLED");
     #endif
-    
+
     #if ENABLE_BLE
     DPRINTLN("BLE:          ENABLED");
     #else
     DPRINTLN("BLE:          DISABLED");
     #endif
-    
+
     DPRINTLN("╚════════════════════════════════════════╝\n");
 }
 
